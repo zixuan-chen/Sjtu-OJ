@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 using namespace std;
 template <class elemType>
 class seqQueue
@@ -131,22 +132,21 @@ bool binaryTree<Type>::isCBT(Node *t)
 	int N, left, right, i = 1,check = 0;
 	seqQueue<Node *> q;
 	Node *tmp;
-    Node *arr[100001];
+    Node *arr[100050];
     bool flag = true;
-	int isChild[100001];
+	int isChild[100050];
+    ifstream fin("in");
+    fin >> N;
+    for(int j = 1; j <= N; j++) arr[j] = new Node();
 
-    cin >> N;
 	while(i <= N){
-        if(arr[i] == NULL) arr[i] = new Node;
-		cin >> left >> right;
-		//cout << "left = " <<left << "; right = " <<right << endl;
+		fin >> left >> right;
+		arr[i]->data = i;
 		if(left != 0){
-		    if(arr[left] == NULL) arr[left] = new Node;
 			arr[i]->left = arr[left];
 			isChild[left] = 1;
 		}
 		if(right != 0){
-		    if(arr[right] == NULL) arr[right] = new Node;
 			arr[i]->right = arr[right];
 			isChild[right] = 1;
 		}
@@ -155,16 +155,13 @@ bool binaryTree<Type>::isCBT(Node *t)
 
 	for(int r = 1; r <= N; r++)
 	{
-	    //cout << isChild[r] << ' ';
 		if(!isChild[r]){
 			t = arr[r];
-			//cout << "r = " << r << endl;
-            //cout << "\nin creatTree: t == NULL : " << (t == NULL) << endl;
-            //preOrder(t);
 			break;
 		}
 	}
-	//cout << "\nin is CBT: t == NULL: " << (t == NULL) << endl;
+    cout << "preOrder: "; preOrder(t); cout << endl;
+
 	flag = true;
 	if (t == NULL) return true;
 	q.enQueue(t);

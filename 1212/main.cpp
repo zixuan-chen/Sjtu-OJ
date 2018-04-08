@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 using namespace std;
 template <class elemType>
 class seqQueue
@@ -76,7 +77,7 @@ private:
     void postOrder( Node *t )  const;
     void midOrder( Node *t ) const;
     void createTree(Node *t);
-    bool isCBT(Node *t);
+    void bfs(Node *t);
 
 public:
 	binaryTree(): root(NULL) {}
@@ -87,7 +88,7 @@ public:
 	bool isEmpty(){return root == NULL;}
 	int size() const {return size(root);}
 	int height() const {return height(root);}
-	bool isCBT(){clear(root);return isCBT(root);}
+	void bfs(){clear(root); bfs(root);}
 	void clear()
 	{
 		if(root != NULL) clear(root);
@@ -126,21 +127,20 @@ int binaryTree<Type>::size( Node *t ) const
 }
 
 template<class Type>
-bool binaryTree<Type>::isCBT(Node *t)
+void binaryTree<Type>::bfs(Node *t)
 {
-	int N, left, right, i = 1,check = 0;
+	int N, left, right,carry, i = 1;
 	seqQueue<Node *> q;
 	Node *tmp;
     Node *arr[100050];
-    bool flag = true;
 	int isChild[100050];
-    ifstream fin("in");
-    fin >> N;
+    //ifstream fin("in");
+    cin >> N;
     for(int j = 1; j <= N; j++) arr[j] = new Node();
 
 	while(i <= N){
-		fin >> left >> right;
-		//cout << "left = " <<left << "; right = " <<right << endl;
+		cin >> left >> right >> carry;
+		arr[i]->data = carry;
 		if(left != 0){
 			arr[i]->left = arr[left];
 			isChild[left] = 1;
@@ -160,32 +160,20 @@ bool binaryTree<Type>::isCBT(Node *t)
 		}
 	}
 
-	flag = true;
-	if (t == NULL) return true;
+	if (t == NULL) return;
 	q.enQueue(t);
 	while(!q.isEmpty())
 	{
 		tmp = q.deQueue();
-		if((flag == false)&&(tmp->left != NULL || tmp->right != NULL))
-            return false;
-		if(tmp->left != NULL && tmp->right != NULL){
-			q.enQueue(tmp->left);
-			q.enQueue(tmp->right);
-		}
-		else if(tmp->left == NULL && tmp->right != NULL) return false;
-		else if(tmp->left != NULL && tmp->right == NULL){
-			flag = false;
-            q.enQueue(tmp->left);
-		}
-		check++;
+		if(tmp->left != NULL) q.enQueue(tmp->left);
+		if(tmp->right != NULL) q.enQueue(tmp->right);
+		cout << tmp->data << ' ';
 	}
-	return true;
 }
 
 int main()
 {
 	binaryTree<int> tree;
-	if(tree.isCBT()) cout << 'Y';
-	else cout << 'N';
+	tree.bfs();
 	return 0;
 }
