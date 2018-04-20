@@ -130,18 +130,21 @@ template<class Type>
 bool binaryTree<Type>::isCBT(Node *t)
 {
 	int N, left, right, i = 1,check = 0;
-	seqQueue<Node *> q;
+	seqQueue<Node*> q;
 	Node *tmp;
-    Node *arr[100050];
     bool flag = true;
-	int isChild[100050];
-    ifstream fin("in");
-    fin >> N;
+    //ifstream fin("in");
+    cin >> N;
+
+    if(N == 0) return true;
+    Node **arr = new Node*[N + 1];
+    int isChild[100001];
+
     for(int j = 1; j <= N; j++) arr[j] = new Node();
 
 	while(i <= N){
-		fin >> left >> right;
-		arr[i]->data = i;
+		cin >> left >> right;
+		//arr[i]->data = i;
 		if(left != 0){
 			arr[i]->left = arr[left];
 			isChild[left] = 1;
@@ -160,7 +163,7 @@ bool binaryTree<Type>::isCBT(Node *t)
 			break;
 		}
 	}
-    cout << "preOrder: "; preOrder(t); cout << endl;
+    //cout << "preOrder: "; preOrder(t); cout << endl;
 
 	flag = true;
 	if (t == NULL) return true;
