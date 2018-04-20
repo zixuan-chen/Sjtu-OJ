@@ -76,8 +76,7 @@ private:
     }
     void postOrder( Node *t )  const;
     void midOrder( Node *t ) const;
-    void createTree(Node *t);
-    bool isCBT(Node *t);
+    void createTree(Node * & t);
 
 public:
 	binaryTree(): root(NULL) {}
@@ -88,7 +87,7 @@ public:
 	bool isEmpty(){return root == NULL;}
 	int size() const {return size(root);}
 	int height() const {return height(root);}
-	bool isCBT(){clear(root);return isCBT(root);}
+	bool isCBT()const;
 	void clear()
 	{
 		if(root != NULL) clear(root);
@@ -127,20 +126,17 @@ int binaryTree<Type>::size( Node *t ) const
 }
 
 template<class Type>
-bool binaryTree<Type>::isCBT(Node *t)
+void binaryTree<Type>::createTree(Node * & t)
 {
-	int N, left, right, i = 1,check = 0;
-	seqQueue<Node *> q;
-	Node *tmp;
-    Node *arr[100050];
-    bool flag = true;
-	int isChild[100050];
-    ifstream fin("in");
-    fin >> N;
+    int N, left, right, i = 1;
+    Node *arr[100001];
+	int isChild[100001];
+    //ifstream fin("in");
+    cin >> N;
     for(int j = 1; j <= N; j++) arr[j] = new Node();
-
+    //create tree
 	while(i <= N){
-		fin >> left >> right;
+		cin >> left >> right;
 		arr[i]->data = i;
 		if(left != 0){
 			arr[i]->left = arr[left];
@@ -153,6 +149,7 @@ bool binaryTree<Type>::isCBT(Node *t)
 		i++;
 	}
 
+	//determine which node is root
 	for(int r = 1; r <= N; r++)
 	{
 		if(!isChild[r]){
@@ -160,11 +157,22 @@ bool binaryTree<Type>::isCBT(Node *t)
 			break;
 		}
 	}
-    cout << "preOrder: "; preOrder(t); cout << endl;
 
-	flag = true;
-	if (t == NULL) return true;
-	q.enQueue(t);
+}
+
+template<class Type>
+bool binaryTree<Type>::isCBT() const
+{
+	if (root == NULL)
+	{//cout << "tree is Empty\n";
+            return true;
+    }
+
+	bool flag = true;
+	seqQueue<Node *> q;
+	Node* tmp;
+
+	q.enQueue(root);
 	while(!q.isEmpty())
 	{
 		tmp = q.deQueue();
@@ -179,15 +187,17 @@ bool binaryTree<Type>::isCBT(Node *t)
 			flag = false;
             q.enQueue(tmp->left);
 		}
-		check++;
 	}
 	return true;
 }
 
 int main()
 {
+    //freopen("in", "r", stdin);
 	binaryTree<int> tree;
+	tree.createTree();
 	if(tree.isCBT()) cout << 'Y';
 	else cout << 'N';
+	//fclose(stdin);
 	return 0;
 }
