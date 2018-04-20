@@ -76,8 +76,7 @@ private:
     }
     void postOrder( Node *t )  const;
     void midOrder( Node *t ) const;
-    void createTree(Node *t);
-    bool isCBT(Node *t);
+    void createTree(Node * & t);
 
 public:
 	binaryTree(): root(NULL) {}
@@ -88,7 +87,7 @@ public:
 	bool isEmpty(){return root == NULL;}
 	int size() const {return size(root);}
 	int height() const {return height(root);}
-	bool isCBT(){clear(root);return isCBT(root);}
+	bool isCBT()const;
 	void clear()
 	{
 		if(root != NULL) clear(root);
@@ -127,8 +126,9 @@ int binaryTree<Type>::size( Node *t ) const
 }
 
 template<class Type>
-bool binaryTree<Type>::isCBT(Node *t)
+void binaryTree<Type>::createTree(Node * & t)
 {
+<<<<<<< HEAD
 	int N, left, right, i = 1,check = 0;
 	seqQueue<Node*> q;
 	Node *tmp;
@@ -140,11 +140,22 @@ bool binaryTree<Type>::isCBT(Node *t)
     Node **arr = new Node*[N + 1];
     int isChild[100001];
 
+=======
+    int N, left, right, i = 1;
+    Node *arr[100001];
+	int isChild[100001];
+    //ifstream fin("in");
+    cin >> N;
+>>>>>>> 145f344e0a48f003fab3a6253b3982bc79e2d0af
     for(int j = 1; j <= N; j++) arr[j] = new Node();
-
+    //create tree
 	while(i <= N){
 		cin >> left >> right;
+<<<<<<< HEAD
 		//arr[i]->data = i;
+=======
+		arr[i]->data = i;
+>>>>>>> 145f344e0a48f003fab3a6253b3982bc79e2d0af
 		if(left != 0){
 			arr[i]->left = arr[left];
 			isChild[left] = 1;
@@ -156,6 +167,7 @@ bool binaryTree<Type>::isCBT(Node *t)
 		i++;
 	}
 
+	//determine which node is root
 	for(int r = 1; r <= N; r++)
 	{
 		if(!isChild[r]){
@@ -163,11 +175,26 @@ bool binaryTree<Type>::isCBT(Node *t)
 			break;
 		}
 	}
+<<<<<<< HEAD
     //cout << "preOrder: "; preOrder(t); cout << endl;
+=======
+>>>>>>> 145f344e0a48f003fab3a6253b3982bc79e2d0af
 
-	flag = true;
-	if (t == NULL) return true;
-	q.enQueue(t);
+}
+
+template<class Type>
+bool binaryTree<Type>::isCBT() const
+{
+	if (root == NULL)
+	{//cout << "tree is Empty\n";
+            return true;
+    }
+
+	bool flag = true;
+	seqQueue<Node *> q;
+	Node* tmp;
+
+	q.enQueue(root);
 	while(!q.isEmpty())
 	{
 		tmp = q.deQueue();
@@ -182,15 +209,17 @@ bool binaryTree<Type>::isCBT(Node *t)
 			flag = false;
             q.enQueue(tmp->left);
 		}
-		check++;
 	}
 	return true;
 }
 
 int main()
 {
+    //freopen("in", "r", stdin);
 	binaryTree<int> tree;
+	tree.createTree();
 	if(tree.isCBT()) cout << 'Y';
 	else cout << 'N';
+	//fclose(stdin);
 	return 0;
 }
