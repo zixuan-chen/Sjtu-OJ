@@ -155,37 +155,39 @@ int main()
 	//freopen("in", "r", stdin);
 
 	int N;
-	char command[11];
-	int op1, op2;
+	char command[8];
+	int op1;
 	priorityQueue<int> q;
 	cin >> N;
 	cin.get();
 	while (N-- > 0)
 	{
-		cin.getline(command, 10, ' ');
+		cin >> command[0];
 		switch (command[0])
 		{
 		case 'i':
+			cin.getline(command, 7, ' ');
 			cin >> op1;
 			cin.get();
+			//cout << "op1 = " << op1 << endl;
 			q.enQueue(op1);
 			break;
 
-		case 'f':
-			cin >> op1;
-			cin.get();
-			cout << q.find(op1, MAX_INT) << endl;
+		case 'm':
+			cin.getline(command, 7, '\n');
+			cout << q.getHead() << endl;
 			break;
 
 		case 'd':
-			cin >> op1 >> op2;
-			cin.get();
-			q.decrease(op1, op2);
+			cin.getline(command, 7, '\n');
+			q.deQueue();
 			break;
+		default: cout << "invalid command!" << endl;
 		}
+
 	}
 
 	//fclose(stdin);
-	//cin.get();
+	
 	return 0;
 }
