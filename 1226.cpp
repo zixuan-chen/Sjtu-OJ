@@ -10,7 +10,7 @@ int divide(T arr[], int low, int high)
         return low;
     T key = arr[low];
     while (low < high)
-    	
+
     {
         while (low < high && arr[high] >= key)
             high--;
@@ -47,13 +47,10 @@ int main(int argc, char const *argv[])
         cin >> arr[i];
     }
     quickSort<int>(arr, 0, N - 1);
-    int kind = 1;
-    for(int i = 1; i< N; i++)
+    for(int i = 0; i< N; i++)
     {
-        if(arr[i] != arr[i - 1]) kind++;
+        cout << arr[i] << ' ';
     }
-
-    cout << kind;
     fclose(stdin);
     return 0;
 }
