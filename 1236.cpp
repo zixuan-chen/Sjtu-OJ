@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 #include <queue>
-#include <stack>
 using namespace std;
-
+#define INF 0x7FFFFFFF
 //--------------------------------priorityQueue-------------------------------
 template <class Type>
 class priorityQueue
@@ -36,29 +36,21 @@ class priorityQueue
 template <class Type>
 void priorityQueue<Type>::doubleSpace()
 {
-    Type *tmp = array;
-    array = new Type[2 * maxSize];
+    Type *tmp = new Type[2 * maxSize];
     for (int i = 0; i <= currentSize; ++i)
-    {
-        array[i] = tmp[i];
-    }
+        tmp[i] = array[i];
     maxSize *= 2;
-    delete[] tmp;
+    delete[] array;
+    array = tmp;
 }
 
 template <class Type>
 void priorityQueue<Type>::percolateUp(int hole)
 {
     Type tmp = array[hole];
-    while (hole != 1)
+    for (; hole > 1 && tmp < array[(hole >> 1)]; hole = (hole >> 1))
     {
-        if (tmp < array[hole / 2])
-        {
-            array[hole] = array[hole / 2];
-            hole /= 2;
-        }
-        else
-            break;
+        array[hole] = array[(hole >> 1)];
     }
     array[hole] = tmp;
 }
@@ -101,7 +93,8 @@ template <class Type>
 Type priorityQueue<Type>::deQueue()
 {
     Type tmp = array[1];
-    array[1] = array[currentSize--];
+    array[1] = array[currentSize];
+    --currentSize;
     percolateDown(1);
     return tmp;
 }
@@ -152,58 +145,28 @@ class adjListGraph
 
     verNode *verList;
     int Vers, Edges;
-
-    void dfs(int v, bool visited[]) const;
-
+    TypeOfEdge distance[Vers];
+    int prev[Vers];
   public:
-    struct DijkstraNode
-    {
-        int node, prev;
-        TypeOfEdge distance;
-        bool known;
-        bool operator<(const DijkstraNode &x)
-        {
-            return distance < x.distance;
-        }
-    };
-
-    adjListGraph(const TypeOfVer vers[], int vSize);
-    bool exist(int u, int v) const;
+    adjListGraph(int vSize);
     bool insert(int u, int v, TypeOfEdge w);
     bool remove(int u, int v);
-    void remove(const TypeOfVer &n);
-    void dfs() const;
-    void bfs() const;
-    void Kruscal() const;
-    void Prim() const;
-    void Dijkstra(int start, DijkstraNode *&res);
-    void printPath(int start, int end, DijkstraNode *&res);
+    void shortestPathNegative(int start);
+    TypeOfEdge getShortestPathWeight(int start, int end);
     ~adjListGraph();
 };
 
 template <class TypeOfVer, class TypeOfEdge>
-adjListGraph<TypeOfVer, TypeOfEdge>::adjListGraph(const TypeOfVer vers[], int vSize)
+adjListGraph<TypeOfVer, TypeOfEdge>::adjListGraph(int vSize)
 {
     verList = new verNode[vSize];
     for (int i = 0; i < vSize; i++)
     {
-        verList[i].value = vers[i];
+        verList[i].value = i;
+        verList[i].head = NULL;
     }
     Vers = vSize;
     Edges = 0;
-}
-
-template <class TypeOfVer, class TypeOfEdge>
-bool adjListGraph<TypeOfVer, TypeOfEdge>::exist(int u, int v) const
-{
-    if (u < 0 || u >= Vers || v < 0 || v >= Vers)
-        return false;
-    edgeNode *tmp = verList[u].head;
-    while (tmp != NULL && tmp->end != v)
-        tmp = tmp->next;
-    if (tmp == NULL)
-        return false;
-    return true;
 }
 
 template <class TypeOfVer, class TypeOfEdge>
@@ -211,34 +174,20 @@ bool adjListGraph<TypeOfVer, TypeOfEdge>::insert(int u, int v, TypeOfEdge w)
 {
     if (u < 0 || u >= Vers || v < 0 || v >= Vers)
         return false;
+
     edgeNode *tmp = verList[u].head;
     while (tmp != NULL && tmp->end != v)
         tmp = tmp->next;
+
     if (tmp != NULL)
-        return false;
-    verList[u].head = new edgeNode(v, w, verList[u].head);
-    ++Edges;
-    return true;
-}
-template <class TypeOfVer, class TypeOfEdge>
-bool adjListGraph<TypeOfVer, TypeOfEdge>::remove(int u, int v)
-{
-    edgeNode *p = verList[u].head, *q = NULL;
-
-    while (p != NULL && p->end != v)
-    {
-        q = p;
-        p = p->next;
-    }
-    if (p == NULL)
-        return false;
-
-    if (q == NULL)
-        verList[u].head = p->next;
+        tmp->weight = (tmp->weight < w) ? tmp->weight : w;
     else
-        q->next = p->next;
-    delete p;
-    Edges--;
+    {
+        tmp = verList[u].head;
+        verList[u].head = new edgeNode(v, w, tmp);
+        ++Edges;
+    }
+
     return true;
 }
 
@@ -258,88 +207,53 @@ adjListGraph<TypeOfVer, TypeOfEdge>::~adjListGraph()
 }
 
 template <class TypeOfVer, class TypeOfEdge>
-void adjListGraph<TypeOfVer, TypeOfEdge>::Dijkstra(int start, DijkstraNode *&res)
+void adjListGraph<TypeOfVer, TypeOfEdge>::shortestPathNegative(int start)
 {
-    const TypeOfEdge noEdge = 10000000;
-    DijkstraNode u;
-    priorityQueue<DijkstraNode> q;
-    edgeNode *p;
-    res = new DijkstraNode[Vers];
-
-    for (int i = 0; i < Vers; i++) //initialization
+    queue<int> q;
+    int v;
+    for(int i = 0; i < Vers; i++)
     {
-        res[i].distance = noEdge;
-        res[i].node = i;
-        res[i].known = false;
-        res[i].prev = -1;
+        distance[i] = INF;
     }
-
-    res[start].known = true;
-    for (p = verList[start].head; p != NULL; p = p->next)
+    distance[start] = 0;
+    q.push(start);
+    while(!q.empty())
     {
-        res[p->end].prev = start;
-        res[p->end].distance = p->weight;
-        q.enQueue(res[p->end]);
-    }
-
-    int minDst;
-    for (int i = 0; i < Vers && !q.isEmpty(); i++)
-    {
-        u = q.deQueue(); //u = u.node
-        res[u.node].known = true;
-        minDst = res[u.node].distance;
-
-        for (p = verList[u.node].head; p != NULL; p = p->next)
+        v = q.front();
+        q.pop();
+        for(edgeNode * tmp = verList[v].head; tmp != NULL; tmp = tmp->next)
         {
-            if (!res[p->end].known && p->weight + minDst < res[p->end].distance)
+            if(distance[v] + tmp->weight < distance[tmp->end])
             {
-                res[p->end].distance = p->weight + minDst;
-                res[p->end].prev = u.node;
-                q.enQueue(res[p->end]);
+                distance[tmp->end] = distance[v] + tmp->weight;
+                prev[w] = v;
             }
         }
     }
 }
 
 template <class TypeOfVer, class TypeOfEdge>
-void adjListGraph<TypeOfVer, TypeOfEdge>::printPath(
-    int start, int end, DijkstraNode *&res)
+TypeOfEdge adjListGraph<TypeOfVer, TypeOfEdge>::getShortestPathWeight(int start, int end)
 {
-    if (start == end)
-    {
-        cout << start;
-        return;
-    }
-    if (res[end].prev == -1)
-    {
-        cout << "no path from start to end" << endl;
-        return;
-    }
-    printPath(start, res[end].prev, res);
-    cout << ' ' << end;
+    shortestPathNegative(start);
+    return distance[end];
 }
 
-//-----------------------improved Dijkstra---------------------------------
+//-----------------------improved shortestPathNegative---------------------------------
 int main(int argc, char const *argv[])
 {
     freopen("in", "r", stdin);
     int n, m, start, end, a, b, p;
     cin >> n >> m >> start >> end;
 
-    adjListGraph<int, int> g(new int[n + 1], n + 1);
-    adjListGraph<int, int>::DijkstraNode *res;
+    adjListGraph<int, int> g(n + 1);
 
     for (int i = 0; i < m; i++)
     {
         cin >> a >> b >> p;
         g.insert(a, b, p);
     }
-
-    g.Dijkstra(start, res);
-
-    cout << res[end].distance << endl;
-
-    g.printPath(start, end, res);
+    cout << g.getShortestPathWeight(start, end);
     fclose(stdin);
     return 0;
 }
