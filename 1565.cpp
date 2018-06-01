@@ -129,10 +129,11 @@ class adjListGraph
     struct edgeNode
     {
         int end;
-        TypeOfEdge weight;
+        TypeOfEdge weight, cost;
         edgeNode *next;
         edgeNode() : next(NULL) {}
-        edgeNode(int e, TypeOfEdge w, edgeNode *n = NULL) : end(e), weight(w), next(n) {}
+        edgeNode(int e, TypeOfEdge w, TypeOfEdge c,  edgeNode *n = NULL) 
+        : end(e), weight(w),cost(c), next(n) {}
     };
 
     struct verNode
@@ -148,11 +149,11 @@ class adjListGraph
 
   public:
     TypeOfEdge *dst;
-    int * len;
-    int * prev;
+    int *cost;
+    int *prev;
 
     adjListGraph(int vSize);
-    bool insert(int u, int v, TypeOfEdge w);
+    bool insert(int u, int v, TypeOfEdge w, TypeOfEdge c);
     bool remove(int u, int v);
     void Dijkstra(int start);
     void printPath(int start, int end);
@@ -164,7 +165,7 @@ adjListGraph<TypeOfVer, TypeOfEdge>::adjListGraph(int vSize)
 {
     verList = new verNode[vSize];
     dst = new TypeOfEdge[vSize];
-    len = new int[vSize];
+    cost = new int[vSize];
     prev = new int[vSize];
     for (int i = 0; i < vSize; i++)
     {
@@ -176,7 +177,7 @@ adjListGraph<TypeOfVer, TypeOfEdge>::adjListGraph(int vSize)
 }
 
 template <class TypeOfVer, class TypeOfEdge>
-bool adjListGraph<TypeOfVer, TypeOfEdge>::insert(int u, int v, TypeOfEdge w)
+bool adjListGraph<TypeOfVer, TypeOfEdge>::insert(int u, int v, TypeOfEdge w, TypeOfEdge c)
 {
     if (u < 0 || u >= Vers || v < 0 || v >= Vers)
         return false;
@@ -186,11 +187,11 @@ bool adjListGraph<TypeOfVer, TypeOfEdge>::insert(int u, int v, TypeOfEdge w)
         tmp = tmp->next;
 
     if (tmp != NULL)
-        tmp->weight = (tmp->weight < w) ? tmp->weight : w;
+        return false;
     else
     {
         tmp = verList[u].head;
-        verList[u].head = new edgeNode(v, w, tmp);
+        verList[u].head = new edgeNode(v, w, c, tmp);
         ++Edges;
     }
 
@@ -212,28 +213,27 @@ adjListGraph<TypeOfVer, TypeOfEdge>::~adjListGraph()
     delete[] verList;
 }
 
-
 struct node
 {
     int ver, dst;
-    bool operator< (const node &x)
+    bool operator<(const node &x)
     {
         return dst < x.dst;
     }
-    node(int v, int d): ver(v), dst(d){}
+    node(int v, int d) : ver(v), dst(d) {}
 };
 
 template <class TypeOfVer, class TypeOfEdge>
 void adjListGraph<TypeOfVer, TypeOfEdge>::Dijkstra(int start)
 {
-    for(int i = 0; i < Vers; i++)
+    for (int i = 0; i < Vers; i++)
     {
         dst[i] = INF;
-        len[i] = INF;
+        cost[i] = INF;
     }
     dst[start] = 0;
-    len[start] = 0;
-    
+    cost[start] = 0;
+
     priorityQueue<node> q;
     q.enQueue(node(start, 0));
     node u;
@@ -242,12 +242,12 @@ void adjListGraph<TypeOfVer, TypeOfEdge>::Dijkstra(int start)
         u = q.deQueue();
         for (p = verList[u.ver].head; p; p = p->next)
         {
-            if ((p->weight + u.dst < dst[p->end]) || 
-            ((p->weight + u.dst == dst[p->end]) && (len[p->end] > len[u.ver] + 1)))
+            if ((p->weight + u.dst < dst[p->end]) ||
+                ((p->weight + u.dst == dst[p->end]) && (cost[p->end] > cost[u.ver] + p->cost)))
             {
                 dst[p->end] = p->weight + u.dst;
                 prev[p->end] = u.ver;
-                len[p->end] = len[u.ver] + 1;
+                cost[p->end] = cost[u.ver] + p->cost;
                 q.enQueue(node(p->end, dst[p->end]));
             }
         }
@@ -271,22 +271,21 @@ void adjListGraph<TypeOfVer, TypeOfEdge>::printPath(
 int main(int argc, char const *argv[])
 {
     freopen("in", "r", stdin);
-    int n, m, start, end, a, b, p;
-    cin >> n >> m >> start >> end;
-
+    int n, m, start, end, a, b, d, p;
+    cin >> n >> m;
     adjListGraph<int, int> g(n + 1);
 
     for (int i = 0; i < m; i++)
     {
-        cin >> a >> b >> p;
-        g.insert(a, b, p);
+        cin >> a >> b >> d >> p;
+        g.insert(a, b, d, p);
+        g.insert(b, a, d, p);
     }
+    cin >> start >> end;
 
     g.Dijkstra(start);
+    cout << g.dst[end] << ' ' << g.cost[end];
 
-    cout << g.dst[end] << endl;
-
-    g.printPath(start, end);
     fclose(stdin);
     return 0;
 }
