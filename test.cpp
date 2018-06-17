@@ -1,15 +1,36 @@
+#include <iostream>
+using namespace std;
 
-
-template<class T>
-void insertSort(T arr[], int size)
+class A
 {
-    int i, j;
-    int key;
-    for(i = 1; i < size; i++)
-    {
-        key = arr[i];
-        for(j = i - 1; j >= 0 && arr[j] > key; j--)
-            arr[j + 1] = arr[j];
-        arr[j] = key;
-    }
+private:
+
+	class B
+	{
+		B()
+		{
+			cout << "B is constructed" << endl;
+		}
+		~B()
+		{
+			cout << "B is destructed" << endl;
+		}
+	};
+	B b();
+	A(int i = 0)
+	{
+		cout << "A is constructed" << endl;
+	}
+	~A()
+	{
+		cout << "A is destructed" << endl;
+	}
+
+};
+
+
+int main(int argc, char const *argv[])
+{
+	A test();
+	return 0;
 }

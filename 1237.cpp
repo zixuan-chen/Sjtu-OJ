@@ -31,8 +31,8 @@ int main()
     for(int i = 0; i < m; i++)
     {
         cin >> a >> b;
-        nodes[a].head = new edge(b, nodes[a].head);
-        nodes[b].inDegree += 1;
+        nodes[b].head = new edge(a, nodes[b].head);
+        nodes[a].inDegree += 1;
     }
 
     int res = 0;
