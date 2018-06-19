@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <queue>
 using namespace std;
 
 struct edge
@@ -22,6 +23,7 @@ int main()
     int n, m, a, b;
     cin >> n >> m;
     node *nodes = new node[n + 1];
+    queue<int> q;
     for(int i = 0; i < n + 1; i++)
     {
         nodes[i].inDegree = 0;
@@ -35,7 +37,15 @@ int main()
         nodes[a].inDegree += 1;
     }
 
-    int res = 0;
+    for(int i = 0; i < m; i++)
+    if(nodes[i].inDegree == 0) q.push(i);
+    int res = 0, current;
+    while(!q.empty())
+    {   
+        current = q.top();q.pop();
+        
+    }
+    /* 
     bool flag = true;
     while(flag)
     {
@@ -60,7 +70,7 @@ int main()
             }
         }
         res++;
-    }
+    } */
     cout << res;
     fclose(stdin);
     return 0;
